@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Focos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .on {
+            background-color: green;
+            color: white;
+        }
+        .off {
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Control de Focos</h1>
+    <button class="on" onclick="controlFoco('on')">Encender</button>
+    <button class="off" onclick="controlFoco('off')">Apagar</button>
+
+    <script>
+        const ESP32_IP = "http://[IP_ESP32]"; // Reemplaza con la IP del ESP32
+
+        function controlFoco(estado) {
+            fetch(`${ESP32_IP}/${estado}`)
+                .then(response => {
+                    if (response.ok) {
+                        alert(`Foco ${estado} correctamente`);
+                    } else {
+                        alert("Error al enviar el comando");
+                    }
+                })
+                .catch(error => alert("No se pudo conectar con el ESP32"));
+        }
+    </script>
+</body>
+</html>
