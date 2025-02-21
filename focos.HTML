@@ -1,43 +1,73 @@
-#include <WiFi.h>
-#include <HTTPClient.h>
-
-const char* ssid = "TuRedWiFi";  // Cambia esto con tu SSID
-const char* password = "TuContraseña";  // Cambia esto con tu contraseña
-
-String url = "https://tu-usuario.github.io/control-focos-esp32/estado.json";
-String estadoAnterior = "";
-
-void setup() {
-    Serial.begin(115200);
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(1000);
-        Serial.println("Conectando a WiFi...");
-    }
-    Serial.println("Conectado a WiFi");
-}
-
-void loop() {
-    if (WiFi.status() == WL_CONNECTED) {
-        HTTPClient http;
-        http.begin(url);
-        int httpResponseCode = http.GET();
-
-        if (httpResponseCode == 200) {
-            String payload = http.getString();
-            Serial.println("Estado recibido: " + payload);
-
-            if (payload.indexOf("ON") > 0 && estadoAnterior != "ON") {
-                Serial.println("ON"); // Enviar al Arduino
-                estadoAnterior = "ON";
-            } else if (payload.indexOf("OFF") > 0 && estadoAnterior != "OFF") {
-                Serial.println("OFF"); // Enviar al Arduino
-                estadoAnterior = "OFF";
-            }
-        } else {
-            Serial.println("Error al obtener datos");
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Focos</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #2c3e50, #4ca1af);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
-        http.end();
-    }
-    delay(5000); // Consultar cada 5 segundos
-}
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .button-container {
+            display: flex;
+            gap: 20px;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+        .on {
+            background-color: #27ae60;
+            color: white;
+        }
+        .off {
+            background-color: #c0392b;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Control de Focos</h1>
+    <div class="button-container">
+        <button class="on" onclick="controlFoco('on')">Encender</button>
+        <button class="off" onclick="controlFoco('off')">Apagar</button>
+    </div>
+
+    <script>
+        const ESP32_IP = "http://[IP_ESP32]"; // Reemplaza con la IP del ESP32
+
+        function controlFoco(estado) {
+            fetch(`${ESP32_IP}/${estado}`)
+                .then(response => {
+                    if (response.ok) {
+                        alert(`Foco ${estado} correctamente`);
+                    } else {
+                        alert("Error al enviar el comando");
+                    }
+                })
+                .catch(error => alert("No se pudo conectar con el ESP32"));
+        }
+    </script>
+</body>
+</html>
